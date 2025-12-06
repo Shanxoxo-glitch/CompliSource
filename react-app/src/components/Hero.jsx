@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import axios from 'axios'
 import './Hero.css'
 
 function Hero({ isAuthenticated, onLogin, scrollPercentage = 0, progressBarColor = 'white', showCircularLoader = true }) {
@@ -14,6 +15,7 @@ function Hero({ isAuthenticated, onLogin, scrollPercentage = 0, progressBarColor
   const [profileImage, setProfileImage] = useState(null)
   const [isSignUp, setIsSignUp] = useState(true)
   const [countingNumber, setCountingNumber] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Calculate loader percentage based on scroll position (17-35% range)
   const loaderPercentage = scrollPercentage >= 17 && scrollPercentage <= 35 
@@ -52,14 +54,63 @@ function Hero({ isAuthenticated, onLogin, scrollPercentage = 0, progressBarColor
     alert('Camera functionality would be implemented here')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    if (isSubmitting) return
+
     if (isSignUp && password !== confirmPassword) {
       alert('Passwords do not match!')
       return
     }
-    if (email) {
-      onLogin(email, profileImage)
+
+    if (!email || !password) {
+      alert('Email and password are required')
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+
+      if (isSignUp) {
+        const payload = {
+          username: email.split('@')[0],
+          email,
+          password,
+          name: fullName,
+          phone,
+          address,
+          business_name: businessAddress,
+          gstin,
+        }
+
+        const res = await axios.post('http://localhost:8000/auth/register', payload, {
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        console.log('Register success:', res.data)
+        alert(res.data?.message || 'Registered successfully, please log in')
+        setIsSignUp(false)
+        return
+      }
+
+      const loginRes = await axios.post(
+        'http://localhost:8000/auth/login',
+        {
+          email,
+          password,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+
+      const token = loginRes.data?.token
+      if (token) {
+        localStorage.setItem('authToken', token)
+      }
+
+      onLogin?.(email, profileImage)
+
       setShowLoginModal(false)
       setEmail('')
       setPassword('')
@@ -70,6 +121,12 @@ function Hero({ isAuthenticated, onLogin, scrollPercentage = 0, progressBarColor
       setGstin('')
       setBusinessAddress('')
       setProfileImage(null)
+    } catch (error) {
+      console.error('Auth error:', error)
+      const message = error?.response?.data?.detail || (isSignUp ? 'Registration failed' : 'Login failed')
+      alert(message)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -266,8 +323,8 @@ function Hero({ isAuthenticated, onLogin, scrollPercentage = 0, progressBarColor
                     required
                   />
                 )}
-                <button type="submit" className="submit-button">
-                  {isSignUp ? 'Sign Up' : 'Log In'}
+                <button type="submit" className="submit-button" disabled={isSubmitting}>
+                  {isSubmitting ? 'Please wait...' : isSignUp ? 'Sign Up' : 'Log In'}
                 </button>
               </form>
               <p className="toggle-auth">
