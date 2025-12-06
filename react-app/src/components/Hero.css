@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alumni+Sans+Pinstripe:ital@0;1&display=swap');
+
 .hero-section {
   position: relative;
   z-index: 2;
@@ -10,23 +16,193 @@
   text-align: center;
 }
 
+.bottom-left-branding {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 100;
+}
+
+.branding-text {
+  font-family: 'Alumni Sans Pinstripe', sans-serif;
+  font-size: 1.5rem;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.vector-symbol {
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
+}
+
+.loading-percentage {
+  position: fixed;
+  top: 50%;
+  right: 3rem;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  transition: color 0.3s ease;
+}
+
+.percentage-number {
+  font-family: 'Alumni Sans Pinstripe', sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  transition: color 0.3s ease;
+}
+
+.loading-bar {
+  width: 4px;
+  height: 250px;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.loading-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transition: height 0.1s ease-out, background 0.3s ease;
+  border-radius: 2px;
+  height: 100%;
+  transform-origin: bottom;
+}
+
+.circular-loader {
+  position: fixed;
+  top: 50%;
+  right: 8rem;
+  transform: translateY(-50%);
+  z-index: 100;
+  transition: opacity 0.3s ease;
+}
+
+.loader-svg {
+  width: 120px;
+  height: 120px;
+  transform: rotate(-90deg);
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(-90deg);
+  }
+  to {
+    transform: rotate(270deg);
+  }
+}
+
+.loader-circle {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 6;
+}
+
+.loader-progress {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 6;
+  stroke-dasharray: 251.2;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease-out;
+}
+
+.loader-percentage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Alumni Sans Pinstripe', sans-serif;
+  font-size: 1.8rem;
+  color: #ffffff;
+  font-weight: 400;
+}
+
+.counting-animation {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  transition: opacity 0.3s ease;
+}
+
+.counting-number {
+  font-family: 'Alumni Sans Pinstripe', sans-serif;
+  font-size: 8rem;
+  color: #ffffff;
+  font-weight: 400;
+  text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.9);
+  animation: countPulse 0.3s ease-out;
+}
+
+@keyframes countPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.scroll-text {
+  position: fixed;
+  top: 60%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 50;
+  transition: opacity 0.5s ease-out;
+}
+
+.scroll-text p {
+  font-family: 'Alumni Sans Pinstripe', sans-serif;
+  font-size: 1.8rem;
+  color: #ffffff;
+  margin: 0.5rem 0;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  letter-spacing: 1px;
+}
+
 .brand-name {
-  font-size: 6rem;
-  font-weight: 700;
-  color: var(--color-white);
+  font-family: 'Alumni Sans Pinstripe', sans-serif;
+  font-size: 7.5rem;
+  font-weight: 400;
+  background: linear-gradient(to right, #ffffff 0%, #ffffff 50%, #000000 60%, #000000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 1.5rem;
   letter-spacing: 3px;
-  text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
   animation: fadeInUp 1s ease-out;
 }
 
 .tagline {
+  font-family: 'Dancing Script', cursive;
   font-size: 1.8rem;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--color-white);
   margin-bottom: 3rem;
   letter-spacing: 1px;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  text-shadow: 3px 3px 12px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 0.7);
   line-height: 1.6;
   animation: fadeInUp 1s ease-out 0.2s both;
 }
@@ -369,20 +545,6 @@
 
 .toggle-auth span:hover {
   opacity: 0.7;
-}
-  margin-top: 1rem;
-  font-size: 0.95rem;
-}
-
-.toggle-auth span {
-  color: var(--color-black);
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.toggle-auth span:hover {
-  opacity: 0.8;
 }
 
 @keyframes fadeInUp {

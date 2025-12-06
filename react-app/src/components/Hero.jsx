@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './Hero.css'
 
-function Hero({ isAuthenticated, onLogin }) {
+function Hero({ isAuthenticated, onLogin, scrollPercentage = 0, progressBarColor = 'white', showCircularLoader = true }) {
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -13,6 +13,28 @@ function Hero({ isAuthenticated, onLogin }) {
   const [businessAddress, setBusinessAddress] = useState('')
   const [profileImage, setProfileImage] = useState(null)
   const [isSignUp, setIsSignUp] = useState(true)
+  const [countingNumber, setCountingNumber] = useState(0)
+
+  // Calculate loader percentage based on scroll position (17-35% range)
+  const loaderPercentage = scrollPercentage >= 17 && scrollPercentage <= 35 
+    ? Math.min(Math.round(((scrollPercentage - 17) / (35 - 17)) * 99), 99)
+    : 0
+    
+  // Determine loader position (left or right)
+  const loaderPosition = scrollPercentage >= 33 ? 'left' : 'right'
+  
+  // Show counting animation after loader disappears (35-50% range)
+  const showCounting = scrollPercentage > 35 && scrollPercentage <= 50
+  
+  // Animate counting from 0 to 5
+  useEffect(() => {
+    if (showCounting) {
+      const targetNumber = Math.min(Math.round(((scrollPercentage - 35) / 15) * 5), 5)
+      setCountingNumber(targetNumber)
+    } else {
+      setCountingNumber(0)
+    }
+  }, [scrollPercentage, showCounting])
 
   const handleImageChange = (e) => {
     const file = e.target.files[0]
@@ -85,6 +107,53 @@ function Hero({ isAuthenticated, onLogin }) {
             </button>
           </div>
         )}
+        
+        <div className="loading-percentage" style={{ color: progressBarColor }}>
+          <div className="percentage-number" style={{ color: progressBarColor }}>{scrollPercentage}%</div>
+          <div className="loading-bar" style={{ background: `rgba(${progressBarColor === 'white' ? '255, 255, 255' : '0, 0, 0'}, 0.2)` }}>
+            <div className="loading-progress" style={{ 
+              width: `${scrollPercentage}%`,
+              background: progressBarColor === 'white' ? 'linear-gradient(to right, #ffffff, #888888)' : 'linear-gradient(to right, #000000, #444444)'
+            }}></div>
+          </div>
+        </div>
+        
+        {scrollPercentage >= 17 && scrollPercentage <= 35 && (
+          <div 
+            className="circular-loader" 
+            style={{ 
+              opacity: scrollPercentage <= 26 ? (scrollPercentage - 17) / 9 : (35 - scrollPercentage) / 9,
+              right: loaderPosition === 'right' ? '8rem' : 'auto',
+              left: loaderPosition === 'left' ? '8rem' : 'auto'
+            }}
+          >
+            <svg className="loader-svg" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" className="loader-circle"></circle>
+              <circle cx="50" cy="50" r="40" className="loader-progress" style={{
+                strokeDashoffset: 251.2 - (251.2 * loaderPercentage / 100)
+              }}></circle>
+            </svg>
+            <div className="loader-percentage">{loaderPercentage}%</div>
+          </div>
+        )}
+        
+        {showCounting && (
+          <div className="counting-animation" style={{ opacity: (scrollPercentage - 35) / 5 }}>
+            <div className="counting-number">{countingNumber}</div>
+          </div>
+        )}
+        
+        {scrollPercentage > 40 && (
+          <div className="scroll-text" style={{ opacity: Math.min((scrollPercentage - 40) / 30, 1) }}>
+            <p>Get your compliance audited now within just a reach of a click away,</p>
+            <p>it's that simple, try it</p>
+          </div>
+        )}
+        
+        <div className="bottom-left-branding">
+          <img src="/images/symbol.svg" alt="Symbol" className="vector-symbol" />
+          <span className="branding-text">Complisource</span>
+        </div>
       </main>
 
       {showLoginModal && (
