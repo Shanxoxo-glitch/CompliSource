@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import './Header.css'
 
 function Header({ isAuthenticated, userEmail, profileImage, onLogout, onLogin }) {
@@ -86,8 +87,9 @@ function Header({ isAuthenticated, userEmail, profileImage, onLogout, onLogin })
             )}
           </button>
           <nav className={`nav-menu ${menuOpen ? 'active' : ''}`}>
+            <Link to="/" className="nav-link">Home</Link>
             <a href="#features" className="nav-link">Features</a>
-            <a href="#dashboard" className="nav-link">Dashboard</a>
+            <Link to="/dashboard" className="nav-link">Dashboard</Link>
             <a href="#prototype" className="nav-link">Prototype Explanation</a>
             <a href="#about" className="nav-link">About</a>
             <a href="#contact" className="nav-link">Contact</a>
