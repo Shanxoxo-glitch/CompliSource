@@ -1,10 +1,70 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import Header from './Header'
 import './Dashboard.css'
 
 function Dashboard({ isAuthenticated, userEmail, profileImage, onLogout, onLogin }) {
   const navigate = useNavigate()
+  const [dashboardData, setDashboardData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  // Calculate statistics from dashboard data
+  const stats = dashboardData ? (() => {
+    const rows = dashboardData.rows || []
+    const totalInvoices = rows.length || 0
+    //const vendor = rows.map(row => row.vendor_name || 'N/A').join(', ')
+    const pass = rows.filter(row => row.status === 'pass').length
+    const fail = rows.filter(row => row.status === 'fail').length
+    const passRate = totalInvoices > 0 ? Math.round((pass / totalInvoices) * 100) : 0
+    const failRate = totalInvoices > 0 ? Math.round((fail / totalInvoices) * 100) : 0
+    
+    return {
+      totalInvoices,
+      pass,
+      fail,
+      //vendor,
+      passRate,
+      failRate,
+      score: rows[0]?.score || 0,
+      //vendor: vendor
+    }
+  })() : {
+    totalInvoices: 0,
+    pass: 0,
+    fail: 0,
+    passRate: 0,
+    failRate: 0,
+    score: 0,
+    //vendor: ''
+  }
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true)
+        const token = localStorage.getItem('authToken')
+        const response = await axios.get('http://localhost:8000/api/dashboardVisual', {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          }
+        })
+        setDashboardData(response.data)
+        setError(null)
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err)
+        setError('Failed to load dashboard data')
+        // Set default values on error
+        setDashboardData({ violations: [], rows: [] })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboardData()
+  }, [])
 
   const handleManualEntryClick = () => {
     navigate('/manual-entry')
@@ -41,7 +101,7 @@ function Dashboard({ isAuthenticated, userEmail, profileImage, onLogout, onLogin
                 </svg>
               </div>
               <h3>Total Invoices</h3>
-              <p className="frame-number">15</p>
+              <p className="frame-number">{loading ? '...' : stats.totalInvoices}</p>
             </div>
           </div>
           
@@ -53,7 +113,7 @@ function Dashboard({ isAuthenticated, userEmail, profileImage, onLogout, onLogin
                 </svg>
               </div>
               <h3>Pass</h3>
-              <p className="frame-number">12</p>
+              <p className="frame-number">{loading ? '...' : stats.pass}</p>
             </div>
           </div>
           
@@ -65,7 +125,7 @@ function Dashboard({ isAuthenticated, userEmail, profileImage, onLogout, onLogin
                 </svg>
               </div>
               <h3>Fail</h3>
-              <p className="frame-number">3</p>
+              <p className="frame-number">{loading ? '...' : stats.fail}</p>
             </div>
           </div>
           
@@ -78,7 +138,7 @@ function Dashboard({ isAuthenticated, userEmail, profileImage, onLogout, onLogin
                 </svg>
               </div>
               <h3>Pass Rate</h3>
-              <p className="frame-percentage">80%</p>
+              <p className="frame-percentage">{loading ? '...' : `${stats.passRate}%`}</p>
             </div>
           </div>
           
@@ -90,7 +150,7 @@ function Dashboard({ isAuthenticated, userEmail, profileImage, onLogout, onLogin
                 </svg>
               </div>
               <h3>Fail Rate</h3>
-              <p className="frame-percentage">20%</p>
+              <p className="frame-percentage">{loading ? '...' : `${stats.failRate}%`}</p>
             </div>
           </div>
         </div>
@@ -129,6 +189,39 @@ function Dashboard({ isAuthenticated, userEmail, profileImage, onLogout, onLogin
                 <div className="header-col risk-col">Risk</div>
                 <div className="header-col date-col">Date</div>
               </div>
+              {loading ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  Loading invoices...
+                </div>
+              ) : error ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255, 0, 0, 0.6)' }}>
+                  {error}
+                </div>
+              ) : dashboardData?.rows?.length > 0 ? (
+                dashboardData.rows.map((row, index) => (
+                  <div key={index} className="invoice-row" style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '1rem 0',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}>
+                    <div className="invoice-col">{row.invoice_number || 'N/A'}</div>
+                    <div className="vendor-col">{row.vendor_name || 'N/A'}</div>
+                    <div className="amount-col">{row.amount}</div>
+                    <div className="status-col" style={{
+                      color: row.status === 'pass' ? '#4ade80' : '#f87171'
+                    }}>
+                      {row.status || 'N/A'}
+                    </div>
+                    <div className="risk-col">{row.score || 'N/A'}</div>
+                    <div className="date-col">{row.created_at.split('T')[0]}</div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  No invoices found
+                </div>
+              )}
             </div>
           </div>
         </div>

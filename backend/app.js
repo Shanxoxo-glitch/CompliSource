@@ -128,40 +128,35 @@ app.get('/profile', verifyToken, async (req, res) => {
   }
 });
 
-app.get('/api/dashboardVisual', async (req, res) => {
+app.get('/api/dashboardVisual', verifyToken, async (req, res) => {
   try {
-    // Get score from summary table
-    const summaryResult = await pool.query(
-      "SELECT score,violations,status FROM dashboard_summary ORDER BY updated_at DESC LIMIT 1"
-    );
+    const query = `
+      SELECT
+        status,
+        score,
+        amount,
+        vendor_name,
+        created_at
+      FROM invoices
+      ORDER BY created_at DESC
+      LIMIT 10
+    `;
 
-    // Get violations from violations table
-    const violationsResult = await pool.query(
-      "SELECT label, count FROM dashboard_violations ORDER BY id ASC"
-    );
+    const { rows } = await pool.query(query);
 
     res.json({
-      violations: violationsResult.rows,
-      rows: summaryResult.rows // you don't have this table → return empty list
+      rows,
+      violations: []
     });
-
   } catch (err) {
-    console.error("Error fetching dashboardVisual:", err);
-    res.status(500).json({ error: "Server error" });
+    console.error('Dashboard API error:', err);
+    res.status(500).json({
+      rows: [],
+      violations: []
+    });
   }
 });
 
-export async function startServer() {
-  await initDb();
-  const port = process.env.PORT || 8000;
-  app.listen(port, () => {
-    console.log(`Express API listening on port ${port}`);
-  });
-}
-
-if (import.meta.env?.MODE !== 'test') {
-  startServer().catch((err) => {
-    console.error('Failed to start server', err);
-    process.exit(1);
-  });
-}
+app.listen(8000, () => {
+  console.log('Server is running on port 8000');
+});
